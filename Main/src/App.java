@@ -8,24 +8,19 @@ public class App {
     // 3. Quit the application
 
     public static void main(String[] args) {
+
         while (true) {
-            int n = kb.nextInt();
-            // int num = getNumber();
-            if (n == 1) {
-
+            System.out.println("Please select an option: \n1. Encrypt File \n2.Decrypt File \n3. Quit");
+            int num = AppUtility.getNumber();
+            if (num == 1) {
+                System.out.println("Encrypting...");
+            } else if (num == 2) {
+                System.out.println("Decrypting...");
+            } else if (num == 3) {
+                System.out.println("GoodBye!");
+                break;
             }
-            // System.out.println(s);
         }
-
     }
 
-    public static int getNumber(){
-        int num;
-       try{
-       num = kb.nextInt();
-
-    catch(InputMismatchException e){
-            kb.nextLine();
-        
-        }
-}}
+}
