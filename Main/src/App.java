@@ -10,7 +10,7 @@ public class App {
     public static void main(String[] args) {
 
         while (true) {
-            System.out.println("Please select an option: \n1. Encrypt File \n2.Decrypt File \n3. Quit");
+            System.out.println("Please select an option: \n1. Encrypt File \n2. Decrypt File \n3. Quit");
             int num = AppUtility.getNumber();
             if (num == 1) {
                 System.out.println("Encrypting...");
@@ -22,6 +22,4 @@ public class App {
             }
         }
     }
-
-    
 }
