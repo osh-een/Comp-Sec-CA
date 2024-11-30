@@ -15,6 +15,9 @@ public class AppUtility {
         int num;
         while (true) {
             try {
+                System.out
+                        .println(
+                                "\n--------------------\n1. Encrypt file\n2. Decrypt file\n3. Exit\n--------------------");
                 System.out.println("Please enter a valid input: ");
                 num = kb.nextInt();
                 return num;
@@ -49,7 +52,6 @@ public class AppUtility {
             System.arraycopy(iv, 0, encryptedWithIv, 0, iv.length);
             System.arraycopy(encryptedData, 0, encryptedWithIv, iv.length, encryptedData.length);
 
-            // Write the encrypted data (Base64 encoded) to the output file
             FileOutputStream fos = new FileOutputStream(outputFile);
             String base64Encrypted = Base64.getEncoder().encodeToString(encryptedWithIv);
             fos.write(base64Encrypted.getBytes());
@@ -58,8 +60,25 @@ public class AppUtility {
             System.out.println("Encryption successful! The key to decrypt this file is:");
             System.out.println(Base64.getEncoder().encodeToString(secretKey.getEncoded()));
             System.out.println("The encrypted file has been saved to 'ciphertext.txt'.");
+
+        } catch (FileNotFoundException e) {
+            System.err.println("\n[Error: The file '" + inputFile + "' was not found]");
+        } catch (IOException e) {
+            System.err.println("\n[Error: There was an I/O issue while reading or writing the file]");
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("\n[Error: The specified algorithm for key generation is not available]");
+        } catch (NoSuchPaddingException e) {
+            System.err.println("\n[Error: The specified padding scheme for encryption is not supported]");
+        } catch (InvalidKeyException e) {
+            System.err.println("\n[Error: The generated AES key is invalid]");
+        } catch (InvalidAlgorithmParameterException e) {
+            System.err.println("\n[Error: The algorithm parameter (IV) is invalid]");
+        } catch (BadPaddingException e) {
+            System.err.println("\n[Error: The padding used during encryption is incorrect]");
+        } catch (IllegalBlockSizeException e) {
+            System.err.println("\n[Error: The block size used during encryption is incorrect]");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("\n[An unexpected error occurred during the encryption process]");
         }
     }
 
@@ -92,8 +111,26 @@ public class AppUtility {
             fos.close();
 
             System.out.println("Decryption successful! The decrypted file has been saved to 'plaintext.txt'.");
+        } catch (FileNotFoundException e) {
+            System.err.println("[Error: The file '" + inputFile + "' was not found]");
+        } catch (IOException e) {
+            System.err.println("[Error: There was an I/O issue while reading or writing the file]");
+        } catch (IllegalArgumentException e) {
+            System.err.println("[Error: The Base64 key or encrypted data is invalid]");
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("[Error: The specified algorithm for decryption is not available]");
+        } catch (NoSuchPaddingException e) {
+            System.err.println("[Error: The specified padding scheme for decryption is not supported]");
+        } catch (InvalidKeyException e) {
+            System.err.println("[Error: The provided key for decryption is invalid]");
+        } catch (InvalidAlgorithmParameterException e) {
+            System.err.println("[Error: The algorithm parameter (IV) is invalid]");
+        } catch (BadPaddingException e) {
+            System.err.println("[Error: The padding used during decryption is incorrect]");
+        } catch (IllegalBlockSizeException e) {
+            System.err.println("[Error: The block size used during decryption is incorrect]");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("[Error: An unexpected error occurred during the decryption process]");
         }
     }
 }
