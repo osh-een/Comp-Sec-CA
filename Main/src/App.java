@@ -2,6 +2,11 @@ import java.util.Scanner;
 
 public class App {
 
+    // https://howtodoinjava.com/java/java-security/aes-256-encryption-decryption/#:~:text=AES%2D256%20Encryption%20Example&text=The%20encrypt()%20method%20takes,using%20PBKDF2%20with%20SHA%2D256.
+    // https://www.geeksforgeeks.org/advanced-encryption-standard-aes/
+    // https://www.baeldung.com/java-aes-encryption-decryption
+    // https://medium.com/@deepak.sirohi9188/java-aes-encryption-and-decryption-1b30c9a5d900
+
     public static void main(String[] args) {
         int choice;
 
