@@ -17,7 +17,7 @@ public class App {
             } else if (num == 2) {
                 System.out.println("Decrypting...");
             } else if (num == 3) {
-                System.out.println("GoodBye!");
+                System.out.println("GoodBye!!");
                 break;
             }
         }
