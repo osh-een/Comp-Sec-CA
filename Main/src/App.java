@@ -1,25 +1,33 @@
-import java.util.*;
+import java.util.Scanner;
 
 public class App {
 
-    static Scanner kb = new Scanner(System.in);
-    // 1. Encrypt a File (Task 2)
-    // 2. Decrypt a File (Task 3)
-    // 3. Quit the application
-
     public static void main(String[] args) {
+        int choice;
+
+        Scanner input = new Scanner(System.in);
 
         while (true) {
-            System.out.println("Please select an option: \n1. Encrypt File \n2. Decrypt File \n3. Quit");
-            int num = AppUtility.getNumber();
-            if (num == 1) {
-                System.out.println("Encrypting...");
-            } else if (num == 2) {
-                System.out.println("Decrypting...");
-            } else if (num == 3) {
-                System.out.println("GoodBye!!");
+            choice = AppUtility.getNumber();
+            if (choice == 1) {
+                System.out.println("\nEnter the filename to encrypt: ");
+                String inputFile = input.nextLine();
+                String encryptedFile = "ciphertext.txt";
+
+                AppUtility.encryptFile(inputFile, encryptedFile);
+            } else if (choice == 2) {
+                System.out.println("\nEnter the filename to decrypt: ");
+                String encryptedFile = input.nextLine();
+                System.out.println("\nEnter the decryption key (Base64 encoded): ");
+                String key = input.nextLine();
+                String decryptedFile = "plaintext.txt";
+
+                AppUtility.decryptFile(encryptedFile, decryptedFile, key);
+            } else if (choice == 3) {
+                System.out.println("Goodbye!");
                 break;
             }
         }
+        input.close();
     }
 }
