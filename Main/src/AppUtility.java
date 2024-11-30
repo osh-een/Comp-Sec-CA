@@ -1,10 +1,14 @@
-import java.util.*;
-import java.io.*;
-import java.security.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
+import java.io.*;
+import java.security.*;
+import java.util.*;
 
 public class AppUtility {
+    private static final int IV_LENGTH = 16;
+    private static final String ALGORITHM = "AES";
+    private static final String CIPHER_TRANSFORMATION = "AES/CBC/PKCS5Padding";
+
     static Scanner kb = new Scanner(System.in);
 
     public static int getNumber() {
@@ -20,107 +24,76 @@ public class AppUtility {
         }
     }
 
-    public static String encrypt(String algorithm, String input, SecretKey key, IvParameterSpec iv)
-            throws NoSuchPaddingException, NoSuchAlgorithmException,
-            InvalidAlgorithmParameterException, InvalidKeyException,
-            BadPaddingException, IllegalBlockSizeException {
+    public static void encryptFile(String inputFile, String outputFile) {
+        try {
+            File file = new File(inputFile);
+            FileInputStream fis = new FileInputStream(file);
+            byte[] fileBytes = new byte[(int) file.length()];
+            fis.read(fileBytes);
+            fis.close();
 
-        Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-        byte[] cipherText = cipher.doFinal(input.getBytes());
-        return Base64.getEncoder().encodeToString(cipherText);
-    }
+            KeyGenerator keyGen = KeyGenerator.getInstance(ALGORITHM);
+            keyGen.init(256);
+            SecretKey secretKey = keyGen.generateKey();
 
-    public static void encryptFile(String algorithm, SecretKey key, IvParameterSpec iv,
-            File inputFile, File outputFile) throws IOException, NoSuchPaddingException,
-            NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException,
-            BadPaddingException, IllegalBlockSizeException {
+            SecureRandom secureRandom = new SecureRandom();
+            byte[] iv = new byte[IV_LENGTH];
+            secureRandom.nextBytes(iv);
+            IvParameterSpec ivSpec = new IvParameterSpec(iv);
 
-        Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-        FileInputStream inputStream = new FileInputStream(inputFile);
-        FileOutputStream outputStream = new FileOutputStream(outputFile);
-        byte[] buffer = new byte[64];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            byte[] output = cipher.update(buffer, 0, bytesRead);
-            if (output != null) {
-                outputStream.write(output);
-            }
-        }
-        byte[] outputBytes = cipher.doFinal();
-        if (outputBytes != null) {
-            outputStream.write(outputBytes);
-        }
-        inputStream.close();
-        outputStream.close();
-    }
+            Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORMATION);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
+            byte[] encryptedData = cipher.doFinal(fileBytes);
 
-    public static void decryptFile(String algorithm, SecretKey key, IvParameterSpec iv,
-            File inputFile, File outputFile) throws IOException,
-            NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+            byte[] encryptedWithIv = new byte[iv.length + encryptedData.length];
+            System.arraycopy(iv, 0, encryptedWithIv, 0, iv.length);
+            System.arraycopy(encryptedData, 0, encryptedWithIv, iv.length, encryptedData.length);
 
-        Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.DECRYPT_MODE, key, iv);
-        FileInputStream inputStream = new FileInputStream(inputFile);
-        FileOutputStream outputStream = new FileOutputStream(outputFile);
-        byte[] buffer = new byte[64];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            byte[] output = cipher.update(buffer, 0, bytesRead);
-            if (output != null) {
-                outputStream.write(output);
-            }
-        }
-        byte[] outputBytes = cipher.doFinal();
-        if (outputBytes != null) {
-            outputStream.write(outputBytes);
-        }
-        inputStream.close();
-        outputStream.close();
-    }
+            // Write the encrypted data (Base64 encoded) to the output file
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            String base64Encrypted = Base64.getEncoder().encodeToString(encryptedWithIv);
+            fos.write(base64Encrypted.getBytes());
+            fos.close();
 
-    void givenFile_whenEncrypt_thenSuccess()
-            throws NoSuchAlgorithmException, IOException, IllegalBlockSizeException,
-            InvalidKeyException, BadPaddingException, InvalidAlgorithmParameterException,
-            NoSuchPaddingException {
-
-        SecretKey key = generateKey(128);
-        String algorithm = "AES/CBC/PKCS5Padding";
-        IvParameterSpec ivParameterSpec = generateIv();
-        Resource resource = new ClassPathResource("inputFile/baeldung.txt");
-        File inputFile = resource.getFile();
-        File encryptedFile = new File("classpath:baeldung.encrypted");
-        File decryptedFile = new File("document.decrypted");
-        encryptFile(algorithm, key, ivParameterSpec, inputFile, encryptedFile);
-        decryptFile(
-                algorithm, key, ivParameterSpec, encryptedFile, decryptedFile);
-        if ((inputFile).equals(decryptedFile)) {
-
+            System.out.println("Encryption successful! The key to decrypt this file is:");
+            System.out.println(Base64.getEncoder().encodeToString(secretKey.getEncoded()));
+            System.out.println("The encrypted file has been saved to 'ciphertext.txt'.");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    public static SecretKey generateKey(int n) throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(n);
-        SecretKey key = keyGenerator.generateKey();
-        return key;
-    }
+    public static void decryptFile(String inputFile, String outputFile, String base64Key) {
+        try {
+            File file = new File(inputFile);
+            FileInputStream fis = new FileInputStream(file);
+            byte[] fileBytes = new byte[(int) file.length()];
+            fis.read(fileBytes);
+            fis.close();
 
-    public static SecretKey getKeyFromPassword(String password, String salt)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
+            byte[] encryptedData = Base64.getDecoder().decode(new String(fileBytes));
 
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), 65536, 256);
-        SecretKey secret = new SecretKeySpec(factory.generateSecret(spec)
-                .getEncoded(), "AES");
-        return secret;
-    }
+            byte[] iv = new byte[IV_LENGTH];
+            System.arraycopy(encryptedData, 0, iv, 0, iv.length);
+            IvParameterSpec ivSpec = new IvParameterSpec(iv);
 
-    public static IvParameterSpec generateIv() {
-        byte[] iv = new byte[16];
-        new SecureRandom().nextBytes(iv);
-        return new IvParameterSpec(iv);
+            byte[] decodedKey = Base64.getDecoder().decode(base64Key);
+            SecretKey secretKey = new SecretKeySpec(decodedKey, ALGORITHM);
+
+            byte[] cipherText = new byte[encryptedData.length - iv.length];
+            System.arraycopy(encryptedData, iv.length, cipherText, 0, cipherText.length);
+
+            Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORMATION);
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
+            byte[] decryptedData = cipher.doFinal(cipherText);
+
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            fos.write(decryptedData);
+            fos.close();
+
+            System.out.println("Decryption successful! The decrypted file has been saved to 'plaintext.txt'.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
