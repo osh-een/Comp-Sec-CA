@@ -18,7 +18,7 @@ public class AppUtility {
                 System.out
                         .println(
                                 "\n--------------------\n1. Encrypt file\n2. Decrypt file\n3. Exit\n--------------------");
-                System.out.println("Please enter a valid input: ");
+                System.out.println("Please enter a valid input: (1-3)");
                 num = kb.nextInt();
                 return num;
             } catch (InputMismatchException e) {
