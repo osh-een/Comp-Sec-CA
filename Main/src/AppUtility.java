@@ -23,6 +23,8 @@ public class AppUtility {
                 return num;
             } catch (InputMismatchException e) {
                 kb.nextLine();
+            } catch (Exception e) {
+                System.out.println("\n[Error: Invalid input]");
             }
         }
     }
